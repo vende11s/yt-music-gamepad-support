@@ -1,5 +1,3 @@
-<div align="center">
-
 
 # This fork is now retired. Read below for migration instructions.
 
@@ -11,10 +9,16 @@ To migrate:
 - Create a YouTube Music preset on the Amuse website.
 - Use the link in your streaming software
 
-> If you are also using the Amuse widget for Spotify, you now require Spotify Premium to use your own apps in the API.  
-> For Spotify widget alternatives, firstly consider switching to YouTube Music and Amuse will continue to function. 
-> Otherwise, try a different music overlay:
-> Nutty's @ nutty.gg, https://nyako.cat/music-overlay, OBS-Tuna, etc. (not affiliated with Amuse, YouTube, or Pear-Desktop). 
+> [!WARNING]
+> Spotify Premium is required to use your own apps in the API.  
+> Switch to YouTube Music or subscribe to Premium and Amuse will continue to function.
+
+Or try these alternatives (these are not endorsements):
+
+- Nutty's @ nutty.gg,
+- Nyan's Music Overlay @ https://music.nyako.cat
+- OBS-Tuna @ https://github.com/univrsal/tuna
+- etc. 
 
 
 # YouTube Music
