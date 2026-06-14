@@ -67,6 +67,14 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // For queue items, ignore the row container itself and title links to allow clean Cover <-> Dots navigation
+    if (e.tagName.toLowerCase() === 'ytmusic-player-queue-item') {
+      return false;
+    }
+    if (e.closest('ytmusic-player-queue-item') && (e.tagName.toLowerCase() === 'a' || e.classList.contains('song-title'))) {
+      return false;
+    }
+
     // Restrict navigation strictly to the current zone
     const isPlayerZone = e.closest('ytmusic-player-bar') !== null;
     const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
@@ -356,6 +364,12 @@ export function onPlayerApiReady() {
         padding: 0 !important;
         height: 0 !important;
       }
+      /* Force menu buttons (3 dots) on queue items to be always visible so they can be navigated to */
+      ytmusic-player-queue-item ytmusic-menu-renderer {
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+
       .gamepad-focused {
         /* Inner white ring (never clipped by siblings because it's inside) */
         outline: 4px solid #fff !important;
