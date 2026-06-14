@@ -176,8 +176,11 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
 
     if (isDir) {
       // Prioritize elements that overlap or are very close on the perpendicular axis
-      // Multiply distPerp by 15 to heavily penalize straying off the current row/column
-      const score = distParallel + distPerp * 15;
+      // Use different weights depending on the axis:
+      // - Left/Right: heavily penalize moving up/down (weight 10) to stay strictly on the same row.
+      // - Up/Down: mildly penalize moving left/right (weight 2) to allow zigzagging grids naturally.
+      const weight = (direction === 'left' || direction === 'right') ? 10 : 2;
+      const score = distParallel + distPerp * weight;
       if (score < bestScore) {
         bestScore = score;
         bestElement = element;
