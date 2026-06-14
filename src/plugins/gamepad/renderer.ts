@@ -1,7 +1,7 @@
 let animationFrameId: number;
 let focusedElement: HTMLElement | null = null;
 let lastButtonStates: Record<number, boolean> = {};
-let currentZone: 'main' | 'search' | 'player' = 'main';
+let currentZone: 'main' | 'search' | 'player' | 'sidebar' = 'main';
 let savedMainElement: HTMLElement | null = null;
 
 const BUTTON_A = 0;
@@ -33,7 +33,8 @@ function getFocusableElements(): HTMLElement[] {
     'paper-icon-button',
     'tp-yt-paper-button',
     'ytmusic-navigation-button-renderer',
-    'ytmusic-search-box'
+    'ytmusic-search-box',
+    'ytmusic-guide-entry-renderer'
   ].join(', ');
   
   const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
@@ -52,10 +53,12 @@ function getFocusableElements(): HTMLElement[] {
     // Restrict navigation strictly to the current zone
     const isPlayerZone = e.closest('ytmusic-player-bar, ytmusic-player-page') !== null;
     const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
+    const isSidebarZone = e.closest('ytmusic-guide-renderer, tp-yt-app-drawer, #guide-wrapper') !== null;
     
     if (currentZone === 'player' && !isPlayerZone) return false;
     if (currentZone === 'search' && !isSearchZone) return false;
-    if (currentZone === 'main' && (isPlayerZone || isSearchZone)) return false;
+    if (currentZone === 'sidebar' && !isSidebarZone) return false;
+    if (currentZone === 'main' && (isPlayerZone || isSearchZone || isSidebarZone)) return false;
 
     const container = e.closest(complexContainers);
     if (container) {
@@ -152,6 +155,15 @@ function setFocus(element: HTMLElement) {
 function cycleZone() {
   if (currentZone === 'main') {
     savedMainElement = focusedElement;
+    currentZone = 'sidebar';
+    const sidebarItem = document.querySelector<HTMLElement>('ytmusic-guide-entry-renderer') || document.querySelector<HTMLElement>('tp-yt-app-drawer a');
+    if (sidebarItem) {
+      setFocus(sidebarItem);
+    } else {
+      // If no sidebar found, skip to search
+      cycleZone();
+    }
+  } else if (currentZone === 'sidebar') {
     currentZone = 'search';
     const searchBox = document.querySelector<HTMLElement>('ytmusic-search-box') || document.querySelector<HTMLElement>('.search-box') || document.querySelector<HTMLElement>('tp-yt-paper-icon-button.ytmusic-search-box');
     if (searchBox) setFocus(searchBox);
