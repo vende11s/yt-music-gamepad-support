@@ -49,6 +49,14 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // Restrict navigation strictly to the current zone
+    const isPlayerZone = e.closest('ytmusic-player-bar, ytmusic-player-page') !== null;
+    const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
+    
+    if (currentZone === 'player' && !isPlayerZone) return false;
+    if (currentZone === 'search' && !isSearchZone) return false;
+    if (currentZone === 'main' && (isPlayerZone || isSearchZone)) return false;
+
     const container = e.closest(complexContainers);
     if (container) {
       const thumb = container.querySelector('ytmusic-thumbnail-renderer');
