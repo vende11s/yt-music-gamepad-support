@@ -357,10 +357,12 @@ export function onPlayerApiReady() {
         height: 0 !important;
       }
       .gamepad-focused {
-        /* Dual-ring high contrast focus (White inner, Black outer + Shadow) */
-        outline: 3px solid rgba(255, 255, 255, 0.95) !important;
-        outline-offset: 1px !important;
-        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.7), 0 12px 24px rgba(0, 0, 0, 0.6) !important;
+        /* High contrast white outline drawn INSIDE the element so it doesn't get covered by siblings */
+        outline: 4px solid rgba(255, 255, 255, 0.95) !important;
+        outline-offset: -4px !important;
+        
+        /* Keep the pop drop-shadow on the outside */
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7) !important;
         
         border-radius: inherit;
         z-index: 99999 !important;
