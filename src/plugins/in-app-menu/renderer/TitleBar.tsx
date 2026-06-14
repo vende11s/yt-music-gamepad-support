@@ -61,6 +61,10 @@ const titleStyle = cacheNoArgs(
       ~ &:not([data-show='true']) {
       transform: translateY(calc(-1 * var(--menu-bar-height, 32px)));
     }
+
+    @media (display-mode: fullscreen) {
+      display: none !important;
+    }
   `,
 );
 
