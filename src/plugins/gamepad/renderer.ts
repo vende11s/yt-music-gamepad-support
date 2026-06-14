@@ -35,7 +35,8 @@ function getFocusableElements(): HTMLElement[] {
     'tp-yt-paper-button',
     'ytmusic-navigation-button-renderer',
     'ytmusic-search-box',
-    'ytmusic-guide-entry-renderer'
+    'ytmusic-guide-entry-renderer',
+    'ytmusic-search-suggestion'
   ].join(', ');
   
   const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
@@ -318,9 +319,18 @@ function handleButtonPress(buttonIndex: number) {
 export function onPlayerApiReady() {
   try {
     console.log('[GamepadPlugin] Initializing gamepad support...');
+    
+    window.addEventListener('yt-navigate-finish', () => {
+      currentZone = 'main';
+      initializedFocus = false;
+    });
+
     const style = document.createElement('style');
     style.id = 'gamepad-plugin-style';
     style.innerHTML = `
+      ytmusic-pivot-bar-renderer {
+        display: none !important;
+      }
       .gamepad-focused {
         outline: 4px solid #f00 !important;
         outline-offset: -4px !important;
