@@ -62,8 +62,8 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
-    // Do not focus the magnifying glass or clear buttons inside the search box separately
-    if (e.closest('ytmusic-search-box') && (e.tagName.toLowerCase() === 'tp-yt-paper-icon-button' || e.tagName.toLowerCase() === 'yt-icon-button' || e.classList.contains('search-icon'))) {
+    // Do not focus the magnifying glass, clear buttons, or inputs inside the search box separately
+    if (e.closest('ytmusic-search-box') && e.tagName.toLowerCase() !== 'ytmusic-search-box' && e.tagName.toLowerCase() !== 'ytmusic-search-suggestion') {
       return false;
     }
 
