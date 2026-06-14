@@ -357,11 +357,29 @@ export function onPlayerApiReady() {
         height: 0 !important;
       }
       .gamepad-focused {
-        outline: 4px solid #f00 !important;
-        outline-offset: -4px !important;
+        /* Dual-ring high contrast focus (White inner, Black outer + Shadow) */
+        outline: 3px solid rgba(255, 255, 255, 0.95) !important;
+        outline-offset: 1px !important;
+        box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.7), 0 12px 24px rgba(0, 0, 0, 0.6) !important;
+        
         border-radius: inherit;
-        z-index: 9999 !important;
-        transition: outline 0.1s;
+        z-index: 99999 !important;
+        opacity: 1 !important; /* Ensure focused elements are fully visible */
+        
+        /* Smooth, TV-like pop animations */
+        transition: transform 0.25s cubic-bezier(0.33, 1, 0.68, 1), box-shadow 0.2s ease, outline-offset 0.2s ease !important;
+      }
+
+      /* Scale up cards and covers for a premium TV UX */
+      ytmusic-two-row-item-renderer.gamepad-focused,
+      ytmusic-thumbnail-renderer.gamepad-focused {
+        transform: scale(1.04) translateY(-2px) !important;
+      }
+      
+      /* Make sure focused buttons inside player don't scale weirdly but pop slightly */
+      tp-yt-paper-icon-button.gamepad-focused,
+      yt-icon-button.gamepad-focused {
+        transform: scale(1.1) !important;
       }
     `;
     document.head.appendChild(style);
