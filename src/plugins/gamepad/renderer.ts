@@ -248,10 +248,11 @@ export function onPlayerApiReady() {
     style.id = 'gamepad-plugin-style';
     style.innerHTML = `
       .gamepad-focused {
-        box-shadow: inset 0 0 0 4px #f00 !important;
+        outline: 4px solid #f00 !important;
+        outline-offset: -4px !important;
         border-radius: inherit;
         z-index: 9999 !important;
-        transition: box-shadow 0.1s;
+        transition: outline 0.1s;
       }
     `;
     document.head.appendChild(style);
