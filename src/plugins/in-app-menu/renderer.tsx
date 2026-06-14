@@ -47,8 +47,10 @@ export const onRendererLoad = async ({
   const applyFullscreenStyles = (isFullscreen: boolean) => {
     if (isFullscreen) {
       document.documentElement.style.setProperty('--menu-bar-height', '0px', 'important');
+      document.documentElement.setAttribute('data-fullscreen', 'true');
     } else {
       document.documentElement.style.removeProperty('--menu-bar-height');
+      document.documentElement.removeAttribute('data-fullscreen');
     }
   };
 

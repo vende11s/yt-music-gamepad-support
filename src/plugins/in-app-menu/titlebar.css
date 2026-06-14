@@ -86,3 +86,7 @@ ytmusic-browse-response .ytmusic-responsive-list-item-renderer {
     --menu-bar-height: 0px !important;
   }
 }
+
+html[data-fullscreen="true"] nav[data-ytmd-main-panel] {
+  display: none !important;
+}

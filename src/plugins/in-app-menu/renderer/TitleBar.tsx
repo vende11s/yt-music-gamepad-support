@@ -194,7 +194,6 @@ export const TitleBar = (props: TitleBarProps) => {
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
   const [menu, setMenu] = createSignal<Menu | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
-  const [isNativeFullscreen, setIsNativeFullscreen] = createSignal(false);
 
   const [data, { refetch }] = createResource(
     async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
@@ -276,11 +275,6 @@ export const TitleBar = (props: TitleBarProps) => {
   };
 
   onMount(async () => {
-    setIsNativeFullscreen((await props.ipc.invoke('window-is-fullscreen')) as boolean);
-    props.ipc.on('window-fullscreen', (isFullscreen: boolean) => {
-      setIsNativeFullscreen(isFullscreen);
-    });
-    
     props.ipc.on('close-all-in-app-menu-panel', async () => {
       setIgnoreTransition(true);
       setMenu(null);
@@ -346,7 +340,6 @@ export const TitleBar = (props: TitleBarProps) => {
       class={titleStyle()}
       data-macos={props.isMacOS}
       data-show={mouseY() < 32}
-      style={{ display: isNativeFullscreen() ? 'none' : '' }}
     >
       <IconButton
         onClick={() => setCollapsed(!collapsed())}

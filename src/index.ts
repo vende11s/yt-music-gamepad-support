@@ -340,6 +340,7 @@ async function createMainWindow() {
     height: windowSize.height,
     backgroundColor: '#000',
     show: false,
+    fullscreen: process.argv.includes('--fullscreen'),
     webPreferences: {
       contextIsolation: true,
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
