@@ -194,7 +194,7 @@ export const TitleBar = (props: TitleBarProps) => {
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
   const [menu, setMenu] = createSignal<Menu | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
-  const [isNativeFullscreen, setIsNativeFullscreen] = createSignal(window.innerHeight === window.screen.height);
+  const [isNativeFullscreen, setIsNativeFullscreen] = createSignal(false);
 
   const [data, { refetch }] = createResource(
     async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
@@ -276,6 +276,8 @@ export const TitleBar = (props: TitleBarProps) => {
   };
 
   onMount(() => {
+    setIsNativeFullscreen(typeof window !== 'undefined' && window.innerHeight === window.screen.height);
+    
     props.ipc.on('close-all-in-app-menu-panel', async () => {
       setIgnoreTransition(true);
       setMenu(null);
