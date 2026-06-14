@@ -75,8 +75,8 @@ function getFocusableElements(): HTMLElement[] {
     if (isMenuItem && e !== isMenuItem) {
       return false;
     }
-    // Exclude time/volume sliders and the artist/album links under the song title
-    if (e.closest('.subtitle, .byline, #progress-bar, #volume-slider, tp-yt-paper-slider, tp-yt-paper-progress')) {
+    // Exclude volume sliders and the artist/album links under the song title
+    if (e.closest('.subtitle, .byline, #volume-slider')) {
       return false;
     }
 
@@ -268,6 +268,71 @@ function cycleZone() {
 
 let lastHref = location.href;
 let popupWasOpen = false;
+let isSeeking = false;
+let scrubTime = 0;
+let scrubOverlay: HTMLElement | null = null;
+let scrubLine: HTMLElement | null = null;
+
+function formatTime(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function showScrubUI(video: HTMLVideoElement) {
+  if (!scrubOverlay) {
+    scrubOverlay = document.createElement('div');
+    scrubOverlay.style.position = 'fixed';
+    scrubOverlay.style.bottom = '120px';
+    scrubOverlay.style.left = '50%';
+    scrubOverlay.style.transform = 'translateX(-50%)';
+    scrubOverlay.style.background = 'rgba(0,0,0,0.9)';
+    scrubOverlay.style.color = 'white';
+    scrubOverlay.style.fontSize = '48px';
+    scrubOverlay.style.fontWeight = 'bold';
+    scrubOverlay.style.padding = '15px 30px';
+    scrubOverlay.style.borderRadius = '12px';
+    scrubOverlay.style.zIndex = '999999';
+    scrubOverlay.style.pointerEvents = 'none';
+    scrubOverlay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8)';
+    document.body.appendChild(scrubOverlay);
+  }
+  
+  if (!scrubLine) {
+    scrubLine = document.createElement('div');
+    scrubLine.style.position = 'fixed';
+    scrubLine.style.width = '4px';
+    scrubLine.style.background = '#fff';
+    scrubLine.style.boxShadow = '0 0 15px #fff';
+    scrubLine.style.zIndex = '999999';
+    scrubLine.style.pointerEvents = 'none';
+    document.body.appendChild(scrubLine);
+  }
+  
+  scrubOverlay.style.display = 'block';
+  scrubLine.style.display = 'block';
+  focusedElement?.classList.add('gamepad-seeking');
+  updateScrubUI(video);
+}
+
+function hideScrubUI() {
+  if (scrubOverlay) scrubOverlay.style.display = 'none';
+  if (scrubLine) scrubLine.style.display = 'none';
+  focusedElement?.classList.remove('gamepad-seeking');
+}
+
+function updateScrubUI(video: HTMLVideoElement) {
+  if (!scrubOverlay || !scrubLine || !focusedElement) return;
+  
+  scrubOverlay.textContent = `${formatTime(scrubTime)} / ${formatTime(video.duration)}`;
+  
+  const rect = focusedElement.getBoundingClientRect();
+  const percentage = scrubTime / video.duration;
+  
+  scrubLine.style.left = `${rect.left + rect.width * percentage}px`;
+  scrubLine.style.top = `${rect.top - 10}px`;
+  scrubLine.style.height = `${rect.height + 20}px`;
+}
 
 function updateGamepad() {
   if (location.href !== lastHref) {
@@ -298,29 +363,43 @@ function updateGamepad() {
     const now = performance.now();
 
     // Check stick navigation
-    if (now - lastNavTime > NAV_COOLDOWN) {
-      let navigated = false;
-      const xAxis = pad.axes[AXIS_X];
-      const yAxis = pad.axes[AXIS_Y];
-      
-      const threshold = 0.5;
-      
-      if (xAxis < -threshold) {
-        navigate('left');
-        navigated = true;
-      } else if (xAxis > threshold) {
-        navigate('right');
-        navigated = true;
-      } else if (yAxis < -threshold) {
-        navigate('up');
-        navigated = true;
-      } else if (yAxis > threshold) {
-        navigate('down');
-        navigated = true;
+    const xAxis = pad.axes[AXIS_X];
+    const yAxis = pad.axes[AXIS_Y];
+    const threshold = 0.5;
+
+    if (isSeeking) {
+      if (Math.abs(xAxis) > 0.1) {
+        const video = document.querySelector('video');
+        if (video) {
+          // Accelerate scrubbing based on stick deflection
+          // Max 30 seconds per second of real time => ~0.5s per frame at 60fps
+          const scrubSpeed = 30;
+          scrubTime += (xAxis * scrubSpeed) / 60;
+          scrubTime = Math.max(0, Math.min(scrubTime, video.duration));
+          updateScrubUI(video);
+        }
       }
-      
-      if (navigated) {
-        lastNavTime = now;
+    } else {
+      if (now - lastNavTime > NAV_COOLDOWN) {
+        let navigated = false;
+        
+        if (xAxis < -threshold) {
+          navigate('left');
+          navigated = true;
+        } else if (xAxis > threshold) {
+          navigate('right');
+          navigated = true;
+        } else if (yAxis < -threshold) {
+          navigate('up');
+          navigated = true;
+        } else if (yAxis > threshold) {
+          navigate('down');
+          navigated = true;
+        }
+        
+        if (navigated) {
+          lastNavTime = now;
+        }
       }
     }
 
@@ -345,7 +424,21 @@ function handleButtonPress(buttonIndex: number) {
       cycleZone();
       break;
     case BUTTON_A:
-      if (focusedElement) {
+      if (isSeeking) {
+        // Apply scrub
+        const video = document.querySelector('video');
+        if (video) video.currentTime = scrubTime;
+        isSeeking = false;
+        hideScrubUI();
+      } else if (focusedElement && (focusedElement.id === 'progress-bar' || focusedElement.tagName.toLowerCase() === 'tp-yt-paper-slider' || focusedElement.tagName.toLowerCase() === 'tp-yt-paper-progress')) {
+        // Enter seeking mode
+        const video = document.querySelector('video');
+        if (video) {
+          isSeeking = true;
+          scrubTime = video.currentTime;
+          showScrubUI(video);
+        }
+      } else if (focusedElement) {
         let targetToClick = focusedElement;
         if (focusedElement.tagName.toLowerCase() === 'ytmusic-thumbnail-renderer') {
           const container = focusedElement.closest('ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer');
@@ -363,7 +456,10 @@ function handleButtonPress(buttonIndex: number) {
       }
       break;
     case BUTTON_B:
-      if (getActiveOverlay()) {
+      if (isSeeking) {
+        isSeeking = false;
+        hideScrubUI();
+      } else if (getActiveOverlay()) {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
       } else {
         window.history.back();
@@ -434,6 +530,28 @@ export function onPlayerApiReady() {
       yt-icon-button.gamepad-focused,
       .play-pause-button.gamepad-focused {
         border-radius: 50% !important;
+      }
+      
+      /* Special styling for progress bar focus to match TV interfaces */
+      #progress-bar.gamepad-focused,
+      tp-yt-paper-slider.gamepad-focused,
+      tp-yt-paper-progress.gamepad-focused {
+        outline: none !important;
+        box-shadow: none !important;
+        transform: scaleY(2) !important;
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.4)) !important;
+        border-radius: 0 !important;
+      }
+      
+      /* Hide any pseudo-element outlines from the standard rule */
+      #progress-bar.gamepad-focused::after,
+      tp-yt-paper-slider.gamepad-focused::after {
+        display: none !important;
+      }
+      
+      /* Dim the element when actively seeking */
+      .gamepad-seeking {
+        opacity: 0.5 !important;
       }
     `;
     document.head.appendChild(style);
