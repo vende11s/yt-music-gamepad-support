@@ -408,20 +408,26 @@ export function onPlayerApiReady() {
       }
 
       .gamepad-focused {
-        /* Inner white ring (never clipped by siblings because it's inside) */
+        /* Inner white ring */
         outline: 4px solid #fff !important;
         outline-offset: -4px !important;
         
-        /* Outer black ring + TV drop shadow (provides contrast for white buttons) */
-        box-shadow: 0 0 0 4px rgba(0,0,0,0.8), 0 8px 20px rgba(0,0,0,0.6) !important;
+        /* Force rounded corners everywhere for a softer TV look */
+        border-radius: 8px !important;
         
-        border-radius: inherit;
         z-index: 99999 !important;
         opacity: 1 !important;
         
         /* Disable transitions and transforms to prevent Chromium compositor rendering bugs */
         transition: none !important;
         transform: none !important;
+      }
+      
+      /* Preserve circular shape for icon buttons */
+      tp-yt-paper-icon-button.gamepad-focused,
+      yt-icon-button.gamepad-focused,
+      .play-pause-button.gamepad-focused {
+        border-radius: 50% !important;
       }
     `;
     document.head.appendChild(style);
