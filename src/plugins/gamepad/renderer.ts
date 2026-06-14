@@ -172,16 +172,16 @@ function updateGamepad() {
       
       const threshold = 0.5;
       
-      if (xAxis < -threshold || pad.buttons[BUTTON_DPAD_LEFT]?.pressed) {
+      if (xAxis < -threshold) {
         navigate('left');
         navigated = true;
-      } else if (xAxis > threshold || pad.buttons[BUTTON_DPAD_RIGHT]?.pressed) {
+      } else if (xAxis > threshold) {
         navigate('right');
         navigated = true;
-      } else if (yAxis < -threshold || pad.buttons[BUTTON_DPAD_UP]?.pressed) {
+      } else if (yAxis < -threshold) {
         navigate('up');
         navigated = true;
-      } else if (yAxis > threshold || pad.buttons[BUTTON_DPAD_DOWN]?.pressed) {
+      } else if (yAxis > threshold) {
         navigate('down');
         navigated = true;
       }
@@ -240,6 +240,10 @@ function handleButtonPress(buttonIndex: number) {
       break;
     case BUTTON_RB:
       document.querySelector<HTMLElement>('.next-button')?.click();
+      break;
+    case BUTTON_DPAD_UP:
+    case BUTTON_DPAD_DOWN:
+      document.querySelector<HTMLElement>('.toggle-player-page-button, tp-yt-paper-icon-button.toggle-player-page-button')?.click();
       break;
   }
 }
