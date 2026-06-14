@@ -273,6 +273,8 @@ export function onPlayerApiReady() {
         border-radius: inherit;
         z-index: 9999 !important;
         transition: outline 0.1s;
+        scroll-margin-bottom: 300px !important;
+        scroll-margin-top: 100px !important;
       }
     `;
     document.head.appendChild(style);
