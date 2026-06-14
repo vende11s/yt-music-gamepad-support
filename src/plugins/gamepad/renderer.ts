@@ -538,8 +538,10 @@ export function onPlayerApiReady() {
         
         z-index: 99999 !important;
         opacity: 1 !important;
-        
-        /* Disable transitions and transforms to prevent Chromium compositor rendering bugs */
+      }
+      
+      /* Disable transitions and transforms to prevent Chromium compositor rendering bugs, except on the progress bar which relies on native transforms for alignment */
+      .gamepad-focused:not(#progress-bar):not(tp-yt-paper-slider):not(tp-yt-paper-progress) {
         transition: none !important;
         transform: none !important;
       }
