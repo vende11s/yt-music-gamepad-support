@@ -1,10 +1,13 @@
 let animationFrameId: number;
 let focusedElement: HTMLElement | null = null;
 let lastButtonStates: Record<number, boolean> = {};
+let currentZone: 'main' | 'search' | 'player' = 'main';
+let savedMainElement: HTMLElement | null = null;
 
 const BUTTON_A = 0;
 const BUTTON_B = 1;
 const BUTTON_X = 2;
+const BUTTON_Y = 3;
 const BUTTON_LB = 4;
 const BUTTON_RB = 5;
 const BUTTON_DPAD_UP = 12;
@@ -28,13 +31,21 @@ function getFocusableElements(): HTMLElement[] {
     'yt-icon-button',
     'paper-icon-button',
     'tp-yt-paper-button',
-    'ytmusic-navigation-button-renderer'
+    'ytmusic-navigation-button-renderer',
+    'ytmusic-search-box'
   ].join(', ');
   
   const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
-  return elements.filter((e) => {
+  const visibleElements = elements.filter((e) => {
     const rect = e.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0 && window.getComputedStyle(e).visibility !== 'hidden';
+  });
+
+  const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer';
+  return visibleElements.filter(e => {
+    if (e.matches(complexContainers)) return true;
+    if (e.closest(complexContainers)) return false;
+    return true;
   });
 }
 
@@ -103,13 +114,38 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
   }
 
   if (bestElement) {
-    if (focusedElement) {
-      focusedElement.classList.remove('gamepad-focused');
+    setFocus(bestElement);
+  }
+}
+
+function setFocus(element: HTMLElement) {
+  if (focusedElement) {
+    focusedElement.classList.remove('gamepad-focused');
+  }
+  focusedElement = element;
+  focusedElement.classList.add('gamepad-focused');
+  focusedElement.focus();
+  focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+}
+
+function cycleZone() {
+  if (currentZone === 'main') {
+    savedMainElement = focusedElement;
+    currentZone = 'search';
+    const searchBox = document.querySelector<HTMLElement>('ytmusic-search-box') || document.querySelector<HTMLElement>('.search-box') || document.querySelector<HTMLElement>('tp-yt-paper-icon-button.ytmusic-search-box');
+    if (searchBox) setFocus(searchBox);
+  } else if (currentZone === 'search') {
+    currentZone = 'player';
+    const playPause = document.querySelector<HTMLElement>('.play-pause-button') || document.querySelector<HTMLElement>('ytmusic-player-bar');
+    if (playPause) setFocus(playPause);
+  } else {
+    currentZone = 'main';
+    if (savedMainElement && document.body.contains(savedMainElement)) {
+      setFocus(savedMainElement);
+    } else {
+      const elements = getFocusableElements();
+      if (elements.length > 0) setFocus(elements[0]);
     }
-    bestElement.classList.add('gamepad-focused');
-    bestElement.focus();
-    bestElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-    focusedElement = bestElement;
   }
 }
 
@@ -164,6 +200,9 @@ function updateGamepad() {
 
 function handleButtonPress(buttonIndex: number) {
   switch (buttonIndex) {
+    case BUTTON_Y:
+      cycleZone();
+      break;
     case BUTTON_A:
       if (focusedElement) {
         focusedElement.click();
@@ -193,11 +232,10 @@ export function onPlayerApiReady() {
     style.id = 'gamepad-plugin-style';
     style.innerHTML = `
       .gamepad-focused {
-        outline: 4px solid #f00 !important;
-        outline-offset: 2px !important;
-        box-shadow: 0 0 10px #f00 !important;
+        box-shadow: inset 0 0 0 4px #f00 !important;
+        border-radius: inherit;
         z-index: 9999 !important;
-        transition: outline 0.1s, box-shadow 0.1s;
+        transition: box-shadow 0.1s;
       }
     `;
     document.head.appendChild(style);
