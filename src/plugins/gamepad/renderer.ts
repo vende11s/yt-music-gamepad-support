@@ -357,31 +357,20 @@ export function onPlayerApiReady() {
         height: 0 !important;
       }
       .gamepad-focused {
-        /* High contrast white outline drawn INSIDE the element so it doesn't get covered by siblings */
+        /* Inner white ring (never clipped by siblings because it's inside) */
         outline: 4px solid #fff !important;
         outline-offset: -4px !important;
         
-        /* Standard box-shadow for depth (no filter, as filter causes Chromium render bugs with outlines) */
-        box-shadow: 0px 8px 20px 4px rgba(0, 0, 0, 0.7) !important;
+        /* Outer black ring + TV drop shadow (provides contrast for white buttons) */
+        box-shadow: 0 0 0 4px rgba(0,0,0,0.8), 0 8px 20px rgba(0,0,0,0.6) !important;
         
         border-radius: inherit;
         z-index: 99999 !important;
-        opacity: 1 !important; /* Ensure focused elements are fully visible */
+        opacity: 1 !important;
         
-        /* Smooth, TV-like pop animations */
-        transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1) !important;
-      }
-
-      /* Scale up cards and covers for a premium TV UX */
-      ytmusic-two-row-item-renderer.gamepad-focused,
-      ytmusic-thumbnail-renderer.gamepad-focused {
-        transform: scale(1.05) !important;
-      }
-      
-      /* Make sure focused buttons inside player don't scale weirdly but pop slightly */
-      tp-yt-paper-icon-button.gamepad-focused,
-      yt-icon-button.gamepad-focused {
-        transform: scale(1.1) !important;
+        /* Disable transitions and transforms to prevent Chromium compositor rendering bugs */
+        transition: none !important;
+        transform: none !important;
       }
     `;
     document.head.appendChild(style);
