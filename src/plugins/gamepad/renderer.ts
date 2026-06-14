@@ -180,7 +180,7 @@ function setFocus(element: HTMLElement) {
   focusedElement = element;
   focusedElement.classList.add('gamepad-focused');
   focusedElement.focus();
-  focusedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  focusedElement.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
 }
 
 function cycleZone() {
@@ -327,8 +327,6 @@ export function onPlayerApiReady() {
         border-radius: inherit;
         z-index: 9999 !important;
         transition: outline 0.1s;
-        scroll-margin-bottom: 300px !important;
-        scroll-margin-top: 100px !important;
       }
     `;
     document.head.appendChild(style);
