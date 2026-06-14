@@ -187,20 +187,26 @@ function handleButtonPress(buttonIndex: number) {
 }
 
 export function onPlayerApiReady() {
-  const style = document.createElement('style');
-  style.id = 'gamepad-plugin-style';
-  style.innerHTML = `
-    .gamepad-focused {
-      outline: 4px solid #f00 !important;
-      outline-offset: 2px !important;
-      box-shadow: 0 0 10px #f00 !important;
-      z-index: 9999 !important;
-      transition: outline 0.1s, box-shadow 0.1s;
-    }
-  `;
-  document.head.appendChild(style);
+  try {
+    console.log('[GamepadPlugin] Initializing gamepad support...');
+    const style = document.createElement('style');
+    style.id = 'gamepad-plugin-style';
+    style.innerHTML = `
+      .gamepad-focused {
+        outline: 4px solid #f00 !important;
+        outline-offset: 2px !important;
+        box-shadow: 0 0 10px #f00 !important;
+        z-index: 9999 !important;
+        transition: outline 0.1s, box-shadow 0.1s;
+      }
+    `;
+    document.head.appendChild(style);
 
-  animationFrameId = requestAnimationFrame(updateGamepad);
+    animationFrameId = requestAnimationFrame(updateGamepad);
+    console.log('[GamepadPlugin] Gamepad support initialized successfully!');
+  } catch (err) {
+    console.error('[GamepadPlugin] Failed to initialize:', err);
+  }
 }
 
 export function onUnload() {
