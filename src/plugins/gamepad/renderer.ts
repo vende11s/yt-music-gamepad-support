@@ -46,7 +46,8 @@ function getFocusableElements(): HTMLElement[] {
     'ytmusic-search-suggestion',
     'ytmusic-menu-navigation-item-renderer',
     'ytmusic-menu-service-item-renderer',
-    'ytmusic-toggle-menu-service-item-renderer'
+    'ytmusic-toggle-menu-service-item-renderer',
+    'ytmusic-playlist-add-to-option-renderer'
   ].join(', ');
   
   const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
@@ -65,7 +66,7 @@ function getFocusableElements(): HTMLElement[] {
     }
 
     // Exclude inner buttons/links of a menu item so you select the whole menu row cleanly
-    const isMenuItem = e.closest('ytmusic-menu-navigation-item-renderer, ytmusic-menu-service-item-renderer, ytmusic-toggle-menu-service-item-renderer');
+    const isMenuItem = e.closest('ytmusic-menu-navigation-item-renderer, ytmusic-menu-service-item-renderer, ytmusic-toggle-menu-service-item-renderer, ytmusic-playlist-add-to-option-renderer');
     if (isMenuItem && e !== isMenuItem) {
       return false;
     }
@@ -153,22 +154,22 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
 
     switch (direction) {
       case 'up':
-        isDir = center.y < currentCenter.y;
+        isDir = center.y < currentCenter.y - 5;
         distParallel = currentCenter.y - center.y;
         distPerp = Math.abs(currentCenter.x - center.x);
         break;
       case 'down':
-        isDir = center.y > currentCenter.y;
+        isDir = center.y > currentCenter.y + 5;
         distParallel = center.y - currentCenter.y;
         distPerp = Math.abs(currentCenter.x - center.x);
         break;
       case 'left':
-        isDir = center.x < currentCenter.x;
+        isDir = center.x < currentCenter.x - 5;
         distParallel = currentCenter.x - center.x;
         distPerp = Math.abs(currentCenter.y - center.y);
         break;
       case 'right':
-        isDir = center.x > currentCenter.x;
+        isDir = center.x > currentCenter.x + 5;
         distParallel = center.x - currentCenter.x;
         distPerp = Math.abs(currentCenter.y - center.y);
         break;
