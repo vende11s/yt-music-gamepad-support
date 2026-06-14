@@ -275,8 +275,11 @@ export const TitleBar = (props: TitleBarProps) => {
     setIsNativeFullscreen(window.innerHeight === window.screen.height);
   };
 
-  onMount(() => {
-    setIsNativeFullscreen(typeof window !== 'undefined' && window.innerHeight === window.screen.height);
+  onMount(async () => {
+    setIsNativeFullscreen((await props.ipc.invoke('window-is-fullscreen')) as boolean);
+    props.ipc.on('window-fullscreen', (isFullscreen: boolean) => {
+      setIsNativeFullscreen(isFullscreen);
+    });
     
     props.ipc.on('close-all-in-app-menu-panel', async () => {
       setIgnoreTransition(true);

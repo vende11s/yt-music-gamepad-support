@@ -43,6 +43,18 @@ export const onRendererLoad = async ({
     ),
     document.body,
   );
+
+  const applyFullscreenStyles = (isFullscreen: boolean) => {
+    if (isFullscreen) {
+      document.documentElement.style.setProperty('--menu-bar-height', '0px', 'important');
+    } else {
+      document.documentElement.style.removeProperty('--menu-bar-height');
+    }
+  };
+
+  ipc.on('window-fullscreen', applyFullscreenStyles);
+  const isFullscreen = (await ipc.invoke('window-is-fullscreen')) as boolean;
+  applyFullscreenStyles(isFullscreen);
 };
 
 export const onPlayerApiReady = () => {

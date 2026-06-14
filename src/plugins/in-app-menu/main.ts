@@ -85,6 +85,10 @@ export const onMainLoad = ({
   handle('window-unmaximize', () => win.unmaximize());
   win.on('unmaximize', () => send('window-unmaximize'));
 
+  handle('window-is-fullscreen', () => win.isFullScreen());
+  win.on('enter-full-screen', () => send('window-fullscreen', true));
+  win.on('leave-full-screen', () => send('window-fullscreen', false));
+
   handle('image-path-to-data-url', (imagePath: string) => {
     const nativeImageIcon = nativeImage.createFromPath(imagePath);
     return nativeImageIcon?.toDataURL();
