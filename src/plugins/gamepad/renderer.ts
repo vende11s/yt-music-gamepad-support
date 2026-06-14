@@ -51,8 +51,13 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // Exclude custom Electron top bar
+    if (e.closest('.title-bar, #title-bar, #window-controls, .in-app-menu')) {
+      return false;
+    }
+
     // Restrict navigation strictly to the current zone
-    const isPlayerZone = e.closest('ytmusic-player-bar, ytmusic-player-page') !== null;
+    const isPlayerZone = e.closest('ytmusic-player-bar') !== null;
     const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
     const isSidebarZone = e.closest('ytmusic-guide-renderer, tp-yt-app-drawer, #guide-wrapper') !== null;
     
@@ -143,6 +148,28 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
   }
 }
 
+function getBestMainElement(elements: HTMLElement[]): HTMLElement | null {
+  if (elements.length === 0) return null;
+
+  // Try to find the currently playing song if we are on the player page
+  const playingItem = elements.find(e => e.closest('ytmusic-player-queue-item[selected], ytmusic-responsive-list-item-renderer[playing]'));
+  if (playingItem) return playingItem;
+
+  // Try to find the first song row or album card
+  const card = elements.find(e => e.tagName.toLowerCase() === 'ytmusic-thumbnail-renderer' || e.closest('ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer'));
+  if (card) return card;
+
+  // Try to find something roughly in the viewport that is not at the very top (skipping top menus)
+  for (const e of elements) {
+    const rect = e.getBoundingClientRect();
+    if (rect.top >= 60) { // below top bar
+      return e;
+    }
+  }
+
+  return elements[0];
+}
+
 function setFocus(element: HTMLElement) {
   if (focusedElement) {
     focusedElement.classList.remove('gamepad-focused');
@@ -179,7 +206,8 @@ function cycleZone() {
       setFocus(savedMainElement);
     } else {
       const elements = getFocusableElements();
-      if (elements.length > 0) setFocus(elements[0]);
+      const best = getBestMainElement(elements);
+      if (best) setFocus(best);
     }
   }
 }
@@ -187,8 +215,9 @@ function cycleZone() {
 function updateGamepad() {
   if (!initializedFocus) {
     const elements = getFocusableElements();
-    if (elements.length > 0) {
-      setFocus(elements[0]);
+    const best = getBestMainElement(elements);
+    if (best) {
+      setFocus(best);
       initializedFocus = true;
     }
   }
