@@ -226,7 +226,15 @@ function cycleZone() {
   }
 }
 
+let lastHref = location.href;
+
 function updateGamepad() {
+  if (location.href !== lastHref) {
+    lastHref = location.href;
+    currentZone = 'main';
+    initializedFocus = false;
+  }
+
   if (!initializedFocus) {
     const elements = getFocusableElements();
     const best = getBestMainElement(elements);
