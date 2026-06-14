@@ -52,8 +52,8 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
-    // Exclude custom Electron top bar
-    if (e.closest('.title-bar, #title-bar, #window-controls, .in-app-menu')) {
+    // Exclude anything that is not part of the actual YouTube Music app (e.g. Electron injected titlebars)
+    if (!e.closest('ytmusic-app, ytmusic-popup-container, tp-yt-iron-overlay-backdrop')) {
       return false;
     }
 
