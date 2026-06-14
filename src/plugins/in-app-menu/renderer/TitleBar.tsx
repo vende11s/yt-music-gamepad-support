@@ -194,6 +194,7 @@ export const TitleBar = (props: TitleBarProps) => {
   const [openTarget, setOpenTarget] = createSignal<HTMLElement | null>(null);
   const [menu, setMenu] = createSignal<Menu | null>(null);
   const [mouseY, setMouseY] = createSignal(0);
+  const [isNativeFullscreen, setIsNativeFullscreen] = createSignal(window.innerHeight === window.screen.height);
 
   const [data, { refetch }] = createResource(
     async () => (await props.ipc.invoke('get-menu')) as Promise<Menu | null>,
@@ -270,6 +271,10 @@ export const TitleBar = (props: TitleBarProps) => {
     setMouseY(e.clientY);
   };
 
+  const handleResize = () => {
+    setIsNativeFullscreen(window.innerHeight === window.screen.height);
+  };
+
   onMount(() => {
     props.ipc.on('close-all-in-app-menu-panel', async () => {
       setIgnoreTransition(true);
@@ -306,6 +311,8 @@ export const TitleBar = (props: TitleBarProps) => {
 
     // tracking mouse position
     window.addEventListener('mousemove', listener);
+    window.addEventListener('resize', handleResize);
+    
     const ytmusicAppLayout = document.querySelector<HTMLElement>('#layout');
     ytmusicAppLayout?.addEventListener('scroll', () => {
       const scrollValue = ytmusicAppLayout.scrollTop;
@@ -325,6 +332,7 @@ export const TitleBar = (props: TitleBarProps) => {
 
   onCleanup(() => {
     window.removeEventListener('mousemove', listener);
+    window.removeEventListener('resize', handleResize);
   });
 
   return (
@@ -333,6 +341,7 @@ export const TitleBar = (props: TitleBarProps) => {
       class={titleStyle()}
       data-macos={props.isMacOS}
       data-show={mouseY() < 32}
+      style={{ display: isNativeFullscreen() ? 'none' : '' }}
     >
       <IconButton
         onClick={() => setCollapsed(!collapsed())}
