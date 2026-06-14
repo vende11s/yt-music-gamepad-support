@@ -220,6 +220,9 @@ function handleButtonPress(buttonIndex: number) {
             const playBtn = container.querySelector<HTMLElement>('ytmusic-play-button-renderer, #play-button');
             if (playBtn) targetToClick = playBtn;
           }
+        } else if (focusedElement.tagName.toLowerCase() === 'ytmusic-search-box') {
+          const searchBtn = focusedElement.querySelector<HTMLElement>('tp-yt-paper-icon-button, .search-icon, #placeholder, input, button');
+          if (searchBtn) targetToClick = searchBtn;
         }
         targetToClick.click();
       } else if (document.activeElement) {
