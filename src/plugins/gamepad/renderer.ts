@@ -65,6 +65,11 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // Do not focus the popup wrappers, dialogs, or listboxes themselves, only their interactive children
+    if (['tp-yt-iron-dropdown', 'iron-dropdown', 'paper-listbox', 'tp-yt-paper-listbox', 'ytmusic-menu-popup-renderer', 'tp-yt-paper-dialog', 'paper-dialog', 'ytmusic-dialog', 'ytmusic-popup-container'].includes(e.tagName.toLowerCase())) {
+      return false;
+    }
+
     // Exclude inner buttons/links of a menu item so you select the whole menu row cleanly
     const isMenuItem = e.closest('ytmusic-menu-navigation-item-renderer, ytmusic-menu-service-item-renderer, ytmusic-toggle-menu-service-item-renderer, ytmusic-playlist-add-to-option-renderer');
     if (isMenuItem && e !== isMenuItem) {
