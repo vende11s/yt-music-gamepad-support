@@ -22,6 +22,13 @@ const AXIS_Y = 1;
 let lastNavTime = 0;
 const NAV_COOLDOWN = 200; // ms
 
+function getActiveOverlay(): HTMLElement | null {
+  const overlay = Array.from(document.querySelectorAll<HTMLElement>('tp-yt-iron-dropdown, iron-dropdown, tp-yt-paper-dialog, paper-dialog, ytmusic-dialog')).find(e => {
+    return e.getAttribute('aria-hidden') !== 'true' && window.getComputedStyle(e).display !== 'none' && e.getBoundingClientRect().width > 0;
+  });
+  return overlay || null;
+}
+
 function getFocusableElements(): HTMLElement[] {
   const selectors = [
     'a',
@@ -36,7 +43,10 @@ function getFocusableElements(): HTMLElement[] {
     'ytmusic-navigation-button-renderer',
     'ytmusic-search-box',
     'ytmusic-guide-entry-renderer',
-    'ytmusic-search-suggestion'
+    'ytmusic-search-suggestion',
+    'ytmusic-menu-navigation-item-renderer',
+    'ytmusic-menu-service-item-renderer',
+    'ytmusic-toggle-menu-service-item-renderer'
   ].join(', ');
   
   const elements = Array.from(document.querySelectorAll<HTMLElement>(selectors));
@@ -46,7 +56,19 @@ function getFocusableElements(): HTMLElement[] {
   });
 
   const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer, ytmusic-guide-entry-renderer';
+  const activeOverlay = getActiveOverlay();
+
   return visibleElements.filter(e => {
+    // TRAP FOCUS: If a popup is open, ONLY allow elements inside the popup
+    if (activeOverlay && !activeOverlay.contains(e)) {
+      return false;
+    }
+
+    // Exclude inner buttons/links of a menu item so you select the whole menu row cleanly
+    const isMenuItem = e.closest('ytmusic-menu-navigation-item-renderer, ytmusic-menu-service-item-renderer, ytmusic-toggle-menu-service-item-renderer');
+    if (isMenuItem && e !== isMenuItem) {
+      return false;
+    }
     // Exclude time/volume sliders and the artist/album links under the song title
     if (e.closest('.subtitle, .byline, #progress-bar, #volume-slider, tp-yt-paper-slider, tp-yt-paper-progress')) {
       return false;
@@ -236,12 +258,19 @@ function cycleZone() {
 }
 
 let lastHref = location.href;
+let popupWasOpen = false;
 
 function updateGamepad() {
   if (location.href !== lastHref) {
     lastHref = location.href;
     currentZone = 'main';
     initializedFocus = false;
+  }
+
+  const popupIsOpen = getActiveOverlay() !== null;
+  if (popupIsOpen !== popupWasOpen) {
+    popupWasOpen = popupIsOpen;
+    initializedFocus = false; // Force refocus to jump into or out of popup
   }
 
   if (!initializedFocus) {
@@ -325,7 +354,11 @@ function handleButtonPress(buttonIndex: number) {
       }
       break;
     case BUTTON_B:
-      window.history.back();
+      if (getActiveOverlay()) {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      } else {
+        window.history.back();
+      }
       break;
     case BUTTON_X:
       document.querySelector<HTMLElement>('.play-pause-button')?.click();
