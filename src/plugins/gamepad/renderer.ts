@@ -330,7 +330,9 @@ export function onPlayerApiReady() {
     style.innerHTML = `
       ytmusic-pivot-bar-renderer,
       ytmusic-tabs,
-      #tab-container.ytmusic-tabs {
+      #tab-container.ytmusic-tabs,
+      ytmusic-player-page ytmusic-tab-renderer,
+      ytmusic-player-page .tab-header-container {
         display: none !important;
         margin: 0 !important;
         padding: 0 !important;
