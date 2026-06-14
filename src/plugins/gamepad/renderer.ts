@@ -44,6 +44,11 @@ function getFocusableElements(): HTMLElement[] {
 
   const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer';
   return visibleElements.filter(e => {
+    // Exclude time/volume sliders and the artist/album links under the song title
+    if (e.closest('.subtitle, .byline, #progress-bar, #volume-slider, tp-yt-paper-slider, tp-yt-paper-progress')) {
+      return false;
+    }
+
     const container = e.closest(complexContainers);
     if (container) {
       const thumb = container.querySelector('ytmusic-thumbnail-renderer');
