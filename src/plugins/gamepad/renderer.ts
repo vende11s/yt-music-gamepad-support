@@ -154,7 +154,8 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
 
     if (isDir) {
       // Prioritize elements that overlap or are very close on the perpendicular axis
-      const score = distParallel + distPerp * 2;
+      // Multiply distPerp by 15 to heavily penalize straying off the current row/column
+      const score = distParallel + distPerp * 15;
       if (score < bestScore) {
         bestScore = score;
         bestElement = element;
