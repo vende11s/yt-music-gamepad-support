@@ -286,24 +286,28 @@ function showScrubUI(video: HTMLVideoElement) {
     scrubOverlay.style.bottom = '120px';
     scrubOverlay.style.left = '50%';
     scrubOverlay.style.transform = 'translateX(-50%)';
-    scrubOverlay.style.background = 'rgba(0,0,0,0.9)';
+    scrubOverlay.style.background = 'rgba(20, 20, 20, 0.4)';
+    scrubOverlay.style.backdropFilter = 'blur(16px)';
+    scrubOverlay.style.WebkitBackdropFilter = 'blur(16px)';
+    scrubOverlay.style.border = '1px solid rgba(255, 255, 255, 0.15)';
     scrubOverlay.style.color = 'white';
     scrubOverlay.style.fontSize = '48px';
     scrubOverlay.style.fontWeight = 'bold';
     scrubOverlay.style.padding = '15px 30px';
-    scrubOverlay.style.borderRadius = '12px';
+    scrubOverlay.style.borderRadius = '16px';
     scrubOverlay.style.zIndex = '999999';
     scrubOverlay.style.pointerEvents = 'none';
-    scrubOverlay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.8)';
+    scrubOverlay.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
     document.body.appendChild(scrubOverlay);
   }
   
   if (!scrubLine) {
     scrubLine = document.createElement('div');
     scrubLine.style.position = 'fixed';
-    scrubLine.style.width = '4px';
+    scrubLine.style.width = '3px';
+    scrubLine.style.borderRadius = '2px';
     scrubLine.style.background = '#fff';
-    scrubLine.style.boxShadow = '0 0 15px #fff';
+    scrubLine.style.boxShadow = '0 0 10px #fff';
     scrubLine.style.zIndex = '999999';
     scrubLine.style.pointerEvents = 'none';
     document.body.appendChild(scrubLine);
@@ -330,8 +334,8 @@ function updateScrubUI(video: HTMLVideoElement) {
   const percentage = scrubTime / video.duration;
   
   scrubLine.style.left = `${rect.left + rect.width * percentage}px`;
-  scrubLine.style.top = `${rect.top - 10}px`;
-  scrubLine.style.height = `${rect.height + 20}px`;
+  scrubLine.style.top = `${rect.top - 4}px`;
+  scrubLine.style.height = `${rect.height + 8}px`;
 }
 
 function updateGamepad() {
@@ -366,6 +370,18 @@ function updateGamepad() {
     const xAxis = pad.axes[AXIS_X];
     const yAxis = pad.axes[AXIS_Y];
     const threshold = 0.5;
+
+    // Auto-enter seeking mode if moving left/right on progress bar
+    if (!isSeeking && focusedElement && (focusedElement.id === 'progress-bar' || focusedElement.tagName.toLowerCase() === 'tp-yt-paper-slider' || focusedElement.tagName.toLowerCase() === 'tp-yt-paper-progress')) {
+      if (Math.abs(xAxis) > threshold) {
+        const video = document.querySelector('video');
+        if (video) {
+          isSeeking = true;
+          scrubTime = video.currentTime;
+          showScrubUI(video);
+        }
+      }
+    }
 
     if (isSeeking) {
       if (Math.abs(xAxis) > 0.1) {
@@ -538,8 +554,7 @@ export function onPlayerApiReady() {
       tp-yt-paper-progress.gamepad-focused {
         outline: none !important;
         box-shadow: none !important;
-        transform: scaleY(2) !important;
-        filter: drop-shadow(0 0 10px rgba(255,255,255,0.4)) !important;
+        filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)) !important;
         border-radius: 0 !important;
       }
       
