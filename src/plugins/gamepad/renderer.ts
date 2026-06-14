@@ -333,9 +333,12 @@ function updateScrubUI(video: HTMLVideoElement) {
   const rect = focusedElement.getBoundingClientRect();
   const percentage = scrubTime / video.duration;
   
+  const thumbHeight = 24;
+  const centerY = rect.top + rect.height / 2;
+  
   scrubLine.style.left = `${rect.left + rect.width * percentage}px`;
-  scrubLine.style.top = `${rect.top - 4}px`;
-  scrubLine.style.height = `${rect.height + 8}px`;
+  scrubLine.style.top = `${centerY - thumbHeight / 2}px`;
+  scrubLine.style.height = `${thumbHeight}px`;
 }
 
 function updateGamepad() {
