@@ -361,15 +361,15 @@ export function onPlayerApiReady() {
         outline: 4px solid #fff !important;
         outline-offset: -4px !important;
         
-        /* Drop shadow filter applies AFTER overflow:hidden, creating a perfect unclipped glow */
-        filter: drop-shadow(0px 8px 16px rgba(0, 0, 0, 0.8)) brightness(1.1) !important;
+        /* Standard box-shadow for depth (no filter, as filter causes Chromium render bugs with outlines) */
+        box-shadow: 0px 8px 20px 4px rgba(0, 0, 0, 0.7) !important;
         
         border-radius: inherit;
         z-index: 99999 !important;
         opacity: 1 !important; /* Ensure focused elements are fully visible */
         
         /* Smooth, TV-like pop animations */
-        transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1), filter 0.2s ease !important;
+        transition: transform 0.2s cubic-bezier(0.33, 1, 0.68, 1) !important;
       }
 
       /* Scale up cards and covers for a premium TV UX */
