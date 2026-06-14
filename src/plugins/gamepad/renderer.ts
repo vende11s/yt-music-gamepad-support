@@ -28,6 +28,7 @@ function getFocusableElements(): HTMLElement[] {
     '[tabindex]:not([tabindex="-1"])',
     'ytmusic-responsive-list-item-renderer',
     'ytmusic-two-row-item-renderer',
+    'ytmusic-thumbnail-renderer',
     'yt-icon-button',
     'paper-icon-button',
     'tp-yt-paper-button',
@@ -43,8 +44,15 @@ function getFocusableElements(): HTMLElement[] {
 
   const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer';
   return visibleElements.filter(e => {
-    if (e.matches(complexContainers)) return true;
-    if (e.closest(complexContainers)) return false;
+    const container = e.closest(complexContainers);
+    if (container) {
+      const thumb = container.querySelector('ytmusic-thumbnail-renderer');
+      if (thumb && visibleElements.includes(thumb as HTMLElement)) {
+        return e === thumb;
+      } else {
+        return e === container;
+      }
+    }
     return true;
   });
 }
@@ -205,7 +213,15 @@ function handleButtonPress(buttonIndex: number) {
       break;
     case BUTTON_A:
       if (focusedElement) {
-        focusedElement.click();
+        let targetToClick = focusedElement;
+        if (focusedElement.tagName.toLowerCase() === 'ytmusic-thumbnail-renderer') {
+          const container = focusedElement.closest('ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer');
+          if (container) {
+            const playBtn = container.querySelector<HTMLElement>('ytmusic-play-button-renderer, #play-button');
+            if (playBtn) targetToClick = playBtn;
+          }
+        }
+        targetToClick.click();
       } else if (document.activeElement) {
         (document.activeElement as HTMLElement).click();
       }
