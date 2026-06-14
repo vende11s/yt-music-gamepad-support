@@ -151,18 +151,21 @@ function navigate(direction: 'up' | 'down' | 'left' | 'right') {
 function getBestMainElement(elements: HTMLElement[]): HTMLElement | null {
   if (elements.length === 0) return null;
 
-  // Try to find the currently playing song if we are on the player page
-  const playingItem = elements.find(e => e.closest('ytmusic-player-queue-item[selected], ytmusic-responsive-list-item-renderer[playing]'));
-  if (playingItem) return playingItem;
+  // Find the first song thumbnail that is fully visible on the screen
+  for (const e of elements) {
+    if (e.tagName.toLowerCase() === 'ytmusic-thumbnail-renderer') {
+      const rect = e.getBoundingClientRect();
+      // 60px accounts for the top nav bar
+      if (rect.top >= 60 && rect.bottom <= window.innerHeight) {
+        return e;
+      }
+    }
+  }
 
-  // Try to find the first song row or album card
-  const card = elements.find(e => e.tagName.toLowerCase() === 'ytmusic-thumbnail-renderer' || e.closest('ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer'));
-  if (card) return card;
-
-  // Try to find something roughly in the viewport that is not at the very top (skipping top menus)
+  // Fallback to the first element below the top bar if no thumbnails are strictly visible
   for (const e of elements) {
     const rect = e.getBoundingClientRect();
-    if (rect.top >= 60) { // below top bar
+    if (rect.top >= 60) {
       return e;
     }
   }
