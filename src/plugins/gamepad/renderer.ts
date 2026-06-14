@@ -328,8 +328,13 @@ export function onPlayerApiReady() {
     const style = document.createElement('style');
     style.id = 'gamepad-plugin-style';
     style.innerHTML = `
-      ytmusic-pivot-bar-renderer {
+      ytmusic-pivot-bar-renderer,
+      ytmusic-tabs,
+      #tab-container.ytmusic-tabs {
         display: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 0 !important;
       }
       .gamepad-focused {
         outline: 4px solid #f00 !important;
