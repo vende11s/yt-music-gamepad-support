@@ -62,6 +62,11 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // Do not focus the magnifying glass or clear buttons inside the search box separately
+    if (e.closest('ytmusic-search-box') && (e.tagName.toLowerCase() === 'tp-yt-paper-icon-button' || e.tagName.toLowerCase() === 'yt-icon-button' || e.classList.contains('search-icon'))) {
+      return false;
+    }
+
     // Restrict navigation strictly to the current zone
     const isPlayerZone = e.closest('ytmusic-player-bar') !== null;
     const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
