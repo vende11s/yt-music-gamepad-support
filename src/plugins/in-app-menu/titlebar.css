@@ -80,3 +80,9 @@ html {
 ytmusic-browse-response .ytmusic-responsive-list-item-renderer {
   will-change: transform;
 }
+
+@media (display-mode: fullscreen) {
+  :root {
+    --menu-bar-height: 0px !important;
+  }
+}
