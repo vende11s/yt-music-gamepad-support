@@ -57,6 +57,11 @@ function getFocusableElements(): HTMLElement[] {
       return false;
     }
 
+    // Do not focus the tab renderer container itself (but its children are fine)
+    if (e.tagName.toLowerCase() === 'ytmusic-tab-renderer') {
+      return false;
+    }
+
     // Restrict navigation strictly to the current zone
     const isPlayerZone = e.closest('ytmusic-player-bar') !== null;
     const isSearchZone = e.closest('ytmusic-nav-bar') !== null;
@@ -331,7 +336,6 @@ export function onPlayerApiReady() {
       ytmusic-pivot-bar-renderer,
       ytmusic-tabs,
       #tab-container.ytmusic-tabs,
-      ytmusic-player-page ytmusic-tab-renderer,
       ytmusic-player-page .tab-header-container {
         display: none !important;
         margin: 0 !important;
