@@ -1,5 +1,6 @@
 let animationFrameId: number;
 let focusedElement: HTMLElement | null = null;
+let initializedFocus = false;
 let lastButtonStates: Record<number, boolean> = {};
 let currentZone: 'main' | 'search' | 'player' | 'sidebar' = 'main';
 let savedMainElement: HTMLElement | null = null;
@@ -43,7 +44,7 @@ function getFocusableElements(): HTMLElement[] {
     return rect.width > 0 && rect.height > 0 && window.getComputedStyle(e).visibility !== 'hidden';
   });
 
-  const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer';
+  const complexContainers = 'ytmusic-responsive-list-item-renderer, ytmusic-two-row-item-renderer, ytmusic-guide-entry-renderer';
   return visibleElements.filter(e => {
     // Exclude time/volume sliders and the artist/album links under the song title
     if (e.closest('.subtitle, .byline, #progress-bar, #volume-slider, tp-yt-paper-slider, tp-yt-paper-progress')) {
@@ -156,9 +157,9 @@ function cycleZone() {
   if (currentZone === 'main') {
     savedMainElement = focusedElement;
     currentZone = 'sidebar';
-    const sidebarItem = document.querySelector<HTMLElement>('ytmusic-guide-entry-renderer') || document.querySelector<HTMLElement>('tp-yt-app-drawer a');
-    if (sidebarItem) {
-      setFocus(sidebarItem);
+    const elements = getFocusableElements();
+    if (elements.length > 0) {
+      setFocus(elements[0]);
     } else {
       // If no sidebar found, skip to search
       cycleZone();
@@ -169,7 +170,8 @@ function cycleZone() {
     if (searchBox) setFocus(searchBox);
   } else if (currentZone === 'search') {
     currentZone = 'player';
-    const playPause = document.querySelector<HTMLElement>('.play-pause-button') || document.querySelector<HTMLElement>('ytmusic-player-bar');
+    const elements = getFocusableElements();
+    const playPause = elements.find(e => e.classList.contains('play-pause-button') || e.id === 'play-pause-button') || elements[0];
     if (playPause) setFocus(playPause);
   } else {
     currentZone = 'main';
@@ -183,6 +185,14 @@ function cycleZone() {
 }
 
 function updateGamepad() {
+  if (!initializedFocus) {
+    const elements = getFocusableElements();
+    if (elements.length > 0) {
+      setFocus(elements[0]);
+      initializedFocus = true;
+    }
+  }
+
   const gamepads = navigator.getGamepads();
   for (const pad of gamepads) {
     if (!pad) continue;
