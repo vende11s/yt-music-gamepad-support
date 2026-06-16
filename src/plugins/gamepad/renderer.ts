@@ -537,10 +537,12 @@ export function onPlayerApiReady() {
 
       /* 7. Gamepad Focus States */
       .gamepad-focused {
-        /* Force the outline to draw completely INSIDE the element to prevent clipping */
-        box-shadow: inset 0 0 0 4px #fff, inset 0 0 20px rgba(255,255,255,0.5) !important;
+        /* Use outward box-shadow instead of inset to prevent overlapping text, 
+           and add position:relative to ensure the shadow draws OVER covers and siblings */
+        box-shadow: 0 0 0 4px #fff, 0 10px 30px rgba(0,0,0,0.5) !important;
         border-radius: 12px !important;
         z-index: 99999 !important;
+        position: relative !important;
         outline: none !important;
       }
       
