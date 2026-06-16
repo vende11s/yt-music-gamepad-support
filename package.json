@@ -182,6 +182,7 @@
   },
   "scripts": {
     "test": "playwright test",
+    "test:ui-preview": "node tests/generate-ui-report.js",
     "test:debug": "cross-env DEBUG=pw:*,-pw:test:protocol playwright test",
     "build": "electron-vite build",
     "vite:inspect": "pnpm clean && electron-vite build --mode development && pnpm exec serve .vite-inspect",

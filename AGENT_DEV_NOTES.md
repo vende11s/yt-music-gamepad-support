@@ -48,7 +48,26 @@ YouTube Music does not use consistent HTML grid layouts; flexboxes and absolute 
 - Implemented `process.argv.includes('--fullscreen')` check inside `src/index.ts` during `BrowserWindow` creation.
 - Allows the user to create a shortcut launching the app natively into OS fullscreen by passing `--fullscreen`.
 
+## 7. UI Testing Environment (Agent Visual Preview)
+- **The Tool**: `tests/agent-ui-inspector.js` is a dedicated Playwright-based script for agents to capture and verify visual UI states in isolation. It utilizes a temporary Electron profile, ensuring no collision with background processes.
+- **Why it exists**: Because agents cannot "look" at the live Electron desktop window directly. After modifying CSS/JS, agents must run this tool, output `.png` files, and use the `view_file` tool to visually analyze the results.
+- **Capabilities**:
+  - `--screenshot=<path>`: Defines where the `.png` is saved.
+  - `--route=<path>`: Direct navigation (e.g. `--route=/library`).
+  - `--click=<selector>`: Click an element (e.g. `--click="ytmusic-play-button-renderer"`).
+  - `--type=<selector>::<text>`: Fill input fields.
+  - `--wait=<ms>`: Explicit delays for loading and animations.
+- **Automated Reporting**: Run `npm run test:ui-preview` to automatically take screenshots of the Home, Explore, and Library tabs, placing them in `ui-reports/` and generating a single Markdown artifact.
+
 ## Future Agent Guidance
 - **Plugin Rebuilding**: Always remember that modifying `.tsx` files inside `src/plugins/` often requires the user to run `npm run build` or restart their `npm run dev` server. Modifying `src/main/` or backend `main.ts` files ALWAYS requires completely closing and restarting the Electron executable. 
 - **CSS Injections**: When tweaking gamepad UI, always prefer injecting `<style>` blocks natively in `gamepad/renderer.ts` rather than modifying the app's core CSS, as it's easier to hot-reload and isolated.
 - **DOM Math**: YouTube Music lazily loads the DOM. Always rely on `getBoundingClientRect()` rather than hardcoded offsets.
+- **UI Modifications**: After completing UI changes, always run the inspector script and analyze the screenshots to ensure nothing is broken or misaligned before finalizing the task.
+## 8. TV-Style UI Edge Cases & Regressions
+- **Sidebar Startup State Bug**: Forcing `#guide-wrapper` to 90px caused the text inside `ytmusic-guide-entry-renderer` items to wrap aggressively, destroying the vertical layout until the first `:focus-within` trigger unwrapped them.
+- **Sidebar Right-Shift Bug**: Stripping the inner width overrides from the sidebar caused YT Music's native flexbox logic to re-evaluate the container, accidentally pushing the 90px wrapper far to the right. **Conclusion**: Never mess with YTM's core sidebar structural CSS unless absolutely anchoring it with `position: fixed`. Best approach is leaving the sidebar natively styled.
+- **Shadow DOM / Dynamic Rendering Resistance**: Hiding specific sidebar UI items (like the "Zwiń/Zmień" section buttons) using advanced CSS pseudo-selectors (e.g., `:has(tp-yt-paper-item[aria-label="..."])`) failed completely because YTM renders these strings dynamically and often inside web components/Shadow DOM where global CSS cannot penetrate reliably.
+  - **The Fix**: A brute-force `setInterval` inside `renderer.ts` that runs every 500ms, scans `.textContent` of all `ytmusic-guide-entry-renderer` elements, and directly injects `style.display = 'none'` via JS.
+- **Variable Injection Danger**: When using `multi_replace_file_content` to inject intervals or imports, deleting a globally scoped plugin variable (like `focusedElement`) by accident immediately causes a fatal ReferenceError, preventing the entire gamepad plugin from booting. Always double-check block replacements!
+
